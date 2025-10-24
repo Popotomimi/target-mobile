@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "target-mobile",
+    "slug": "target-mobile",
+    "scheme": "target-mobile",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.robertooliver.targetmobile",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#3d44cd"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.robertooliver.targetmobile",
+      "icon": "./assets/ios-icon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
