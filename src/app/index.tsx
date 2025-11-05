@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { HomeHeader } from "@/components/HomeHeader";
+import { HomeHeader, HomeHeaderProps } from "@/components/HomeHeader";
 import { Target, TargetProps } from "@/components/Target";
 import { Alert, StatusBar, View } from "react-native";
 import { List } from "@/components/List";
@@ -9,18 +9,15 @@ import { router, useFocusEffect } from "expo-router";
 import { numberToCurrency } from "@/utils/numberToCurrency";
 import { useTargetDatabase } from "@/database/useTargetDatabase";
 import { Loading } from "@/components/Loading";
-
-const summary = {
-  total: "R$ 19.600,00",
-  input: { label: "Entradas", value: "R$ 6,184.90" },
-  output: { label: "Saídas", value: "R$ 13,415,10" },
-};
+import { useTransactionsDatabase } from "@/database/useTransactionsDatabase";
 
 export default function Index() {
+  const [summary, setSummary] = useState<HomeHeaderProps>();
   const [isFetching, setIsFetching] = useState(true);
   const [targets, setTargets] = useState<TargetProps[]>([]);
 
   const targetDatabase = useTargetDatabase();
+  const transactionDatabase = useTransactionsDatabase();
 
   async function fetchTargets(): Promise<TargetProps[]> {
     try {
@@ -39,11 +36,37 @@ export default function Index() {
     }
   }
 
+  async function fetchSummary(): Promise<HomeHeaderProps> {
+    try {
+      const response = await transactionDatabase.summary();
+
+      return {
+        total: numberToCurrency(response.input + response.output),
+        input: {
+          label: "Entradas",
+          value: numberToCurrency(response.input),
+        },
+        output: {
+          label: "Saídas",
+          value: numberToCurrency(response.output),
+        },
+      };
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível carregar o resumo.");
+      console.log(error);
+    }
+  }
+
   async function fetchData() {
     const targetDataPromise = fetchTargets();
+    const summaryDataPromise = fetchSummary();
 
-    const [targetData] = await Promise.all([targetDataPromise]);
+    const [targetData, summaryData] = await Promise.all([
+      targetDataPromise,
+      summaryDataPromise,
+    ]);
     setTargets(targetData);
+    setSummary(summaryData);
     setIsFetching(false);
   }
 

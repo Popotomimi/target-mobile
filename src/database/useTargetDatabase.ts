@@ -46,7 +46,7 @@ export function useTargetDatabase() {
       FROM targets 
       LEFT JOIN transactions ON targets.id = transactions.target_id
       GROUP BY targets.id, targets.name, targets.amount
-      ORDER BY current DESC
+      ORDER BY percentage DESC
       `);
   }
 
@@ -69,7 +69,7 @@ export function useTargetDatabase() {
   async function update(data: TargetUpdate) {
     const statement = await database.prepareAsync(`
       UPDATE targets SET
-        name: $name,
+        name = $name,
         amount = $amount,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $id
@@ -82,10 +82,15 @@ export function useTargetDatabase() {
     });
   }
 
+  async function remove(id: number) {
+    await database.runAsync("DELETE FROM targets WHERE id = ?", id);
+  }
+
   return {
     create,
     show,
     update,
+    remove,
     lisBySavedValue,
   };
 }
